@@ -8,6 +8,7 @@ import android.app.ActivityManager.AppTask;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -224,8 +225,20 @@ public class BackgroundModeExt extends CordovaPlugin {
 
                 AlertDialog.Builder dialog = new AlertDialog.Builder(activity, Theme_DeviceDefault_Light_Dialog);
 
-                dialog.setPositiveButton(ok, (o, d) -> activity.startActivity(intent));
-                dialog.setNegativeButton(cancel, (o, d) -> {});
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.startActivity(intent);
+                    }
+                };
+
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {}
+                };
+
+                dialog.setPositiveButton(ok, positive);
+                dialog.setNegativeButton(cancel, negative);
                 dialog.setCancelable(true);
 
                 if (spec != null && spec.has("title"))
@@ -363,7 +376,13 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void addSreenAndKeyguardFlags()
     {
-        getApp().runOnUiThread(() -> getApp().getWindow().addFlags(FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | FLAG_SHOW_WHEN_LOCKED | FLAG_TURN_SCREEN_ON | FLAG_DISMISS_KEYGUARD));
+        Runnable lambda = new Runnable() {
+            @Override
+            public void run() {
+                getApp().getWindow().addFlags(FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | FLAG_SHOW_WHEN_LOCKED | FLAG_TURN_SCREEN_ON | FLAG_DISMISS_KEYGUARD);
+            }
+        };
+        getApp().runOnUiThread(lambda);
     }
 
     /**
@@ -371,7 +390,13 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void clearScreenAndKeyguardFlags()
     {
-        getApp().runOnUiThread(() -> getApp().getWindow().clearFlags(FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | FLAG_SHOW_WHEN_LOCKED | FLAG_TURN_SCREEN_ON | FLAG_DISMISS_KEYGUARD));
+        Runnable lambda = new Runnable() {
+            @Override
+            public void run() {
+                getApp().getWindow().clearFlags(FLAG_ALLOW_LOCK_WHILE_SCREEN_ON | FLAG_SHOW_WHEN_LOCKED | FLAG_TURN_SCREEN_ON | FLAG_DISMISS_KEYGUARD);
+            }
+        };
+        getApp().runOnUiThread(lambda);
     }
 
     /**
@@ -379,7 +404,13 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     static void clearKeyguardFlags (Activity app)
     {
-        app.runOnUiThread(() -> app.getWindow().clearFlags(FLAG_DISMISS_KEYGUARD));
+        Runnable lambda = new Runnable() {
+            @Override
+            public void run() {
+                app.getWindow().clearFlags(FLAG_DISMISS_KEYGUARD);
+            }
+        };
+        app.runOnUiThread(lambda);
     }
 
     /**
