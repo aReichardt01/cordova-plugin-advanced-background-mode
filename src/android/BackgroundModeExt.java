@@ -145,7 +145,7 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void disableWebViewOptimizations() {
 
-        Runnable uiThreadTask =  new Runnable() {
+        final Runnable uiThreadTask =  new Runnable() {
             @Override
             public void run() {
                 View view = webView.getEngine().getView();
@@ -223,12 +223,16 @@ public class BackgroundModeExt extends CordovaPlugin {
                     break;
                 }
 
-                AlertDialog.Builder dialog = new AlertDialog.Builder(activity, Theme_DeviceDefault_Light_Dialog);
+                final AlertDialog.Builder dialog = new AlertDialog.Builder(activity, Theme_DeviceDefault_Light_Dialog);
+
+                final Activity activityFinal = activity;
+
+                final Intent intentFinal = intent;
 
                 DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        activity.startActivity(intent);
+                        activityFinal.startActivity(intentFinal);
                     }
                 };
 
@@ -255,10 +259,12 @@ public class BackgroundModeExt extends CordovaPlugin {
                     dialog.setMessage("missing text");
                 }
 
+                final AlertDialog.Builder dialogFinal = dialog;
+
                 Runnable show = new Runnable() {
                     @Override
                     public void run() {
-                        dialog.show();
+                        dialogFinal.show();
                     }
                 };
 
@@ -404,10 +410,11 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     static void clearKeyguardFlags (Activity app)
     {
+        final Activity appFinal = app;
         Runnable lambda = new Runnable() {
             @Override
             public void run() {
-                app.getWindow().clearFlags(FLAG_DISMISS_KEYGUARD);
+                appFinal.getWindow().clearFlags(FLAG_DISMISS_KEYGUARD);
             }
         };
         app.runOnUiThread(lambda);
