@@ -143,21 +143,27 @@ public class BackgroundModeExt extends CordovaPlugin {
      * Enable GPS position tracking while in background.
      */
     private void disableWebViewOptimizations() {
+
+        Runnable uiThreadTask =  new Runnable() {
+            @Override
+            public void run() {
+                View view = webView.getEngine().getView();
+
+                try {
+                    Class.forName("org.crosswalk.engine.XWalkCordovaView")
+                            .getMethod("onShow")
+                            .invoke(view);
+                } catch (Exception e){
+                    view.dispatchWindowVisibilityChanged(View.VISIBLE);
+                }
+            }
+        };
+
         Thread thread = new Thread(){
             public void run() {
                 try {
                     Thread.sleep(1000);
-                    getApp().runOnUiThread(() -> {
-                        View view = webView.getEngine().getView();
-
-                        try {
-                            Class.forName("org.crosswalk.engine.XWalkCordovaView")
-                                 .getMethod("onShow")
-                                 .invoke(view);
-                        } catch (Exception e){
-                            view.dispatchWindowVisibilityChanged(View.VISIBLE);
-                        }
-                    });
+                    getApp().runOnUiThread(uiThreadTask);
                 } catch (InterruptedException e) {
                     // do nothing
                 }
@@ -236,7 +242,14 @@ public class BackgroundModeExt extends CordovaPlugin {
                     dialog.setMessage("missing text");
                 }
 
-                activity.runOnUiThread(dialog::show);
+                Runnable show = new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.show();
+                    }
+                };
+
+                activity.runOnUiThread(show);
 
                 break;
             }
